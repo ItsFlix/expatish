@@ -3,20 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firestore Admin</title>
+  <title>Firestore Data Tree</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 20px;
+    }
+    li {
+      margin: 5px 0;
+    }
+    .node {
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h1>Firestore Admin</h1>
-
-  <button id="readData">Read Data</button>
-  <div id="output"></div>
+  <h1>Firestore Data Tree</h1>
+  <div id="treeContainer">Loading data...</div>
 
   <script>
-    document.getElementById('readData').addEventListener('click', async () => {
+    // Fetch data from the backend
+    async function fetchData() {
       const response = await fetch('https://stripebackend-production-0a48.up.railway.app/read-data/Events');
+      if (!response.ok) {
+        document.getElementById('treeContainer').innerText = "Failed to load data.";
+        return;
+      }
       const data = await response.json();
-      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-    });
+      return data;
+    }
+
+    // Create a tree structure from the data
+    function createTree(data, parentElement) {
+      const ul = document.createElement('ul');
+      parentElement.appendChild(ul);
+
+      data.forEach(item => {
+        const li = document.createElement('li');
+        const text = document.createElement('span');
+        text.innerText = item.id;
+        text.classList.add('node');
+        li.appendChild(text);
+        ul.appendChild(li);
+
+        if (item.subcollections && Object.keys(item.subcollections).length > 0) {
+          const subUl = document.createElement('ul');
+          subUl.classList.add('hidden');
+          li.appendChild(subUl);
+
+          Object.entries(item.subcollections).forEach(([subName, subItems]) => {
+            const subLi = document.createElement('li');
+            subLi.innerHTML = `<b>${subName}:</b>`;
+            subUl.appendChild(subLi);
+            createTree(subItems, subLi);
+          });
+
+          text.addEventListener('click', () => {
+            subUl.classList.toggle('hidden');
+          });
+        } else {
+          const detailsUl = document.createElement('ul');
+          Object.entries(item).forEach(([key, value]) => {
+            if (key !== 'id' && key !== 'subcollections') {
+              const detailLi = document.createElement('li');
+              detailLi.innerText = `${key}: ${value}`;
+              detailsUl.appendChild(detailLi);
+            }
+          });
+          li.appendChild(detailsUl);
+        }
+      });
+    }
+
+    // Initialize the tree
+    async function init() {
+      const data = await fetchData();
+      if (data) {
+        const container = document.getElementById('treeContainer');
+        container.innerHTML = ''; // Clear loading text
+        createTree(data, container);
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
