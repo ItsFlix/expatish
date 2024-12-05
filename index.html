@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestore Admin</title>
+</head>
+<body>
+  <h1>Firestore Admin</h1>
+
+  <button id="readData">Read Data</button>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById('readData').addEventListener('click', async () => {
+      const response = await fetch('https://stripebackend-production-0a48.up.railway.app/read-data');
+      const data = await response.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+</body>
+</html>
