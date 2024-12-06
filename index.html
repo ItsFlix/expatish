@@ -40,6 +40,11 @@
       display: block;
     }
 
+    .paymentDetails {
+      display: none; /* Initially hide payment details */
+      margin-top: 10px;
+    }
+
     ul {
       list-style-type: none;
       padding-left: 20px;
@@ -51,7 +56,6 @@
   </style>
 </head>
 <body>
-  <h1>Nested Events and Payments Tree</h1>
   <div id="treeContainer">Loading data...</div>
 
   <script>
@@ -64,10 +68,11 @@
       return await response.json();
     }
 
-  function convertTimestamp(timestamp) {
-  const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
-  return date.toLocaleString(); // Returns a readable date format (localized)
-}
+    // Convert Firestore timestamp to readable format
+    function convertTimestamp(timestamp) {
+      const date = new Date(timestamp._seconds * 1000); // Convert seconds to milliseconds
+      return date.toLocaleString(); // Returns a readable date format (localized)
+    }
 
     // Recursive function to process nested events and attach payments
     function createEventTree(events, paymentsByEvent, parentElement) {
@@ -88,28 +93,38 @@
         paymentsForEvent.forEach(payment => {
           const paymentFrame = document.createElement('div');
           paymentFrame.classList.add('frame');
-          paymentFrame.innerText = payment.orderid;
-          console.log(payment.created)
+          paymentFrame.innerText = `OrderID: ${payment.orderid} - ${payment.name}`;
 
-          const paymentDetails = document.createElement('ul');
+          const paymentDetails = document.createElement('div');
+          paymentDetails.classList.add('paymentDetails');
+
+          const paymentList = document.createElement('ul');
           Object.entries(payment).forEach(([key, value]) => {
-  // Skip 'subcollections'
-  if (key === 'subcollections') return;
+            // Skip 'subcollections'
+            if (key === 'subcollections') return;
 
-  // Check if the key is 'created' and convert the timestamp to a readable format
-  if (key === 'created' && value._seconds && value._nanoseconds) {
-    const readableTimestamp = convertTimestamp(value);
-    const detailLi = document.createElement('li');
-    detailLi.innerText = `${key}: ${readableTimestamp}`;
-    paymentDetails.appendChild(detailLi);
-  } else {
-    // Normal behavior for other keys
-    const detailLi = document.createElement('li');
-    detailLi.innerText = `${key}: ${value}`;
-    paymentDetails.appendChild(detailLi);
-  }
-});
+            // Check if the key is 'created' and convert the timestamp to a readable format
+            if (key === 'created' && value._seconds && value._nanoseconds) {
+              const readableTimestamp = convertTimestamp(value);
+              const detailLi = document.createElement('li');
+              detailLi.innerText = `${key}: ${readableTimestamp}`;
+              paymentList.appendChild(detailLi);
+            } else {
+              // Normal behavior for other keys
+              const detailLi = document.createElement('li');
+              detailLi.innerText = `${key}: ${value}`;
+              paymentList.appendChild(detailLi);
+            }
+          });
+
+          paymentDetails.appendChild(paymentList);
           paymentFrame.appendChild(paymentDetails);
+
+          // Add event listener to toggle visibility of payment details on click
+          paymentFrame.addEventListener('click', () => {
+            paymentDetails.classList.toggle('paymentDetails'); // Toggle visibility of details
+          });
+
           eventSubTree.appendChild(paymentFrame);
         });
 
