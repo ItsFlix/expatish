@@ -48,7 +48,10 @@
       data.forEach(item => {
         const li = document.createElement('li');
         const text = document.createElement('span');
-        text.innerText = item.id;
+        
+        // Use orderid if available, otherwise fall back to id
+        const displayId = item.orderid || item.id;
+        text.innerText = displayId;
         text.classList.add('node');
         li.appendChild(text);
         ul.appendChild(li);
