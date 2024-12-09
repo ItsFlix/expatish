@@ -364,15 +364,56 @@ eventFrame.addEventListener('click', () => {
       `;
     }
 
-    document.getElementById('saveConfigButton').addEventListener('click', async () => {
-    // Dynamically get the documentId (assuming it's stored somewhere, e.g., in a hidden field or a variable)
+
+document.getElementById('saveConfigButton').addEventListener('click', async () => {
     const documentId = state.current.id; // Fetch dynamically from a data attribute
+    const pricecheck = state.current.price
+
     if (!documentId) {
         alert("Document ID not found. Please select an event to configure.");
         return;
     }
 
-    const updates = {
+    if (pricecheck){
+      console.log('sub event')
+      const subEventId = state.current.id
+      const documentId = state.current._id
+      const updates = {
+        title: document.getElementById('configTitle').value,
+        text: document.getElementById('configDescription').value,
+        date: document.getElementById('configDate').value,
+        start: document.getElementById('configStartTime').value,
+        end: document.getElementById('configEndTime').value,
+        originalprice: document.getElementById('configOriginalPrice').value,
+        price: document.getElementById('configPrice').value,
+        status: document.getElementById('configStatus').value,
+        stock: document.getElementById('configStock').value,
+    };
+
+    try {
+      console.log({ documentId, subEventId, updates })
+        const response = await fetch('https://stripebackend-production-0a48.up.railway.app/update-sub-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ documentId, subEventId, updates }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Properties updated successfully!');
+            
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error('Error saving configuration:', error);
+        alert('An error occurred. Please try again.');
+    }
+    }
+
+    if (!pricecheck){
+      console.log('main event')
+      const updates = {
         title: document.getElementById('configTitle').value,
         text: document.getElementById('configDescription').value,
         category: document.getElementById('configCategory').value,
@@ -389,7 +430,7 @@ eventFrame.addEventListener('click', () => {
         const result = await response.json();
         if (response.ok) {
             alert('Properties updated successfully!');
-            const events = await fetchData('Events');
+            
         } else {
             alert(`Error: ${result.error}`);
         }
@@ -397,8 +438,9 @@ eventFrame.addEventListener('click', () => {
         console.error('Error saving configuration:', error);
         alert('An error occurred. Please try again.');
     }
-});
 
+    }
+});
 
     // Example initialization
     async function init() {
