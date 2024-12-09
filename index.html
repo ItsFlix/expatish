@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nested Events and Payments Tree</title>
-  <style>
+ <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -25,6 +25,7 @@
       padding: 10px;
       cursor: pointer;
       background-color: #f9f9f9;
+      position: relative;
       transition: background-color 0.3s ease;
     }
 
@@ -76,12 +77,15 @@
     }
 
     #formContainer button {
-      padding: 10px 15px;
+      top: 5px;
+      right: 5px;
+      padding: 5px 10px;
       background-color: #4CAF50;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      z-index: 10;
     }
 
     #formContainer button:hover {
@@ -90,15 +94,36 @@
 
     .configureProperties {
       display: none;
-      margin-top: 20px;
+      width: 300px;
+      padding: 20px;
       border: 1px solid #ccc;
-      padding: 10px;
-      background-color: #f0f0f0;
-      width: 250px; /* Adjusted width to make the form horizontally smaller */
+      border-radius: 5px;
+      background-color: #f9f9f9;
     }
 
     .configureProperties input {
       width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .configureButton {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .configureButton:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -165,8 +190,9 @@
         eventFrame.appendChild(configureButton);
 
         // Event listener for Configure button
-        configureButton.addEventListener('click', () => {
+        configureButton.addEventListener('click', (eventv2) => {
           // Determine which properties to show based on whether it's a main event or sub-event
+          eventv2.stopPropagation();
           const configFields = document.getElementById('configFields');
           configFields.innerHTML = ''; // Clear previous fields
 
@@ -247,13 +273,13 @@
         <input type="text" id="configTitle" name="configTitle" value="${event.title || ''}" placeholder="Event Title">
         
         <label for="configDescription">Description:</label>
-        <input type="text" id="configDescription" name="configDescription" value="${event.description || ''}" placeholder="Event Description">
+        <input type="text" id="configDescription" name="configDescription" value="${event.text || ''}" placeholder="Event Description">
 
         <label for="configCategory">Category:</label>
         <input type="text" id="configCategory" name="configCategory" value="${event.category || ''}" placeholder="Event Category">
 
         <label for="configImage">Image URL:</label>
-        <input type="text" id="configImage" name="configImage" value="${event.image || ''}" placeholder="Image URL">
+        <input type="text" id="configImage" name="configImage" value="${event.imageUrl || ''}" placeholder="Image URL">
       `;
     }
 
@@ -264,16 +290,16 @@
         <input type="text" id="configTitle" name="configTitle" value="${event.title || ''}" placeholder="Sub-Event Title">
         
         <label for="configDescription">Description:</label>
-        <input type="text" id="configDescription" name="configDescription" value="${event.description || ''}" placeholder="Sub-Event Description">
+        <input type="text" id="configDescription" name="configDescription" value="${event.text || ''}" placeholder="Sub-Event Description">
 
         <label for="configDate">Date:</label>
         <input type="text" id="configDate" name="configDate" value="${event.date || ''}" placeholder="Sub-Event Date">
 
         <label for="configStartTime">Start Time:</label>
-        <input type="text" id="configStartTime" name="configStartTime" value="${event.starttime || ''}" placeholder="Start Time">
+        <input type="text" id="configStartTime" name="configStartTime" value="${event.start || ''}" placeholder="Start Time">
 
         <label for="configEndTime">End Time:</label>
-        <input type="text" id="configEndTime" name="configEndTime" value="${event.endtime || ''}" placeholder="End Time">
+        <input type="text" id="configEndTime" name="configEndTime" value="${event.end || ''}" placeholder="End Time">
 
         <label for="configOriginalPrice">Original Price:</label>
         <input type="text" id="configOriginalPrice" name="configOriginalPrice" value="${event.originalprice || ''}" placeholder="Original Price">
