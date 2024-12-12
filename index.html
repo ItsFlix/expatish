@@ -230,6 +230,21 @@
       }
     });
 
+
+    async function refreshPage() {
+  try {
+    // Fetch updated data
+    const events = await fetchData('Events');
+    
+    // Update state
+    //console.log(events)
+    setState({ local: events });
+    console.log('refreshed state')
+  } catch (error) {
+    console.error('Failed to refresh page:', error);
+  }
+}
+
     // Fetch data from the backend
     async function fetchData(endpoint) {
       const response = await fetch(`https://stripebackend-production-0a48.up.railway.app/read-data/${endpoint}`, {
@@ -250,10 +265,11 @@
     }
 
     // Recursive function to process nested events and attach payments
-    function createEventTree(events, paymentsByEvent, parentElement) {
+    function createEventTree(events,paymentsByEvent, parentElement) {
       //console.log(state.local)
       const ul = document.createElement('ul');
       parentElement.appendChild(ul);
+      //console.log(events)
 
       events.forEach(event => {
         const eventFrame = document.createElement('div');
@@ -268,24 +284,7 @@
 
         // Event listener for Configure button
         configureButton.addEventListener('click', (eventv2) => {
-          // Determine which properties to show based on whether it's a main event or sub-event
-          eventv2.stopPropagation();
-          const configFields = document.getElementById('configFields');
-          configFields.innerHTML = ''; // Clear previous fields
-
-          if (event.subcollections && event.subcollections['->']) {
-            // This is a sub-event, show sub-event properties
-            createMainEventConfigFields(configFields, event);
-          } else {
-            // This is a main event, show main event properties
-            createSubEventConfigFields(configFields, event);
-
-          }
-
-          // Show the Configure Properties frame
-          document.getElementById('configureProperties').style.display = 'block';
-
-                      // Get the innerText of the eventFrame and remove 'Configure'
+            // Get the innerText of the eventFrame and remove 'Configure'
   let eventFrameText = eventFrame.innerText;
   eventFrameText = eventFrameText.replace('Configure', '').trim(); // Remove 'Configure' and trim any extra spaces
 
@@ -300,7 +299,7 @@
     if (state.local[i].id === eventFrameText) {
       setState({ current: state.local[i] });
       console.log('Selected Element', state.current.id);
-      return; // Exit the loop if a match is found
+      //return; // Exit the loop if a match is found
     }
 
     // Now check in the subcollections
@@ -313,15 +312,31 @@
         if (subcollections[j].id === eventFrameText) {
           setState({ current: subcollections[j] });
           console.log('Selected Element', state.current.id);
-          return; // Exit the loop if a match is found
+          //return; // Exit the loop if a match is found
         }
       }
     }
   }
 
-  console.log('No match found.');
-        });
+          // Determine which properties to show based on whether it's a main event or sub-event
+          eventv2.stopPropagation();
+          const configFields = document.getElementById('configFields');
+          configFields.innerHTML = ''; // Clear previous fields
+          //console.log('updating fields')
 
+          if (event.subcollections && event.subcollections['->']) {
+            // This is a sub-event, show sub-event properties
+            createMainEventConfigFields(configFields, event);
+          } else {
+            // This is a main event, show main event properties
+            createSubEventConfigFields(configFields, event);
+
+          }
+
+          // Show the Configure Properties frame
+          document.getElementById('configureProperties').style.display = 'block';
+        });
+                    
         // Sub-tree for this event
         const eventSubTree = document.createElement('div');
         eventSubTree.classList.add('subTree');
@@ -384,50 +399,52 @@ eventFrame.addEventListener('click', () => {
 
     // Create main event config fields
     function createMainEventConfigFields(configFields, event) {
+      //console.log(state.current)
       configFields.innerHTML = `
         <label for="configTitle">Title:</label>
-        <input type="text" id="configTitle" name="configTitle" value="${event.title || ''}" placeholder="Event Title">
+        <input type="text" id="configTitle" name="configTitle" value="${state.current.title || ''}" placeholder="Event Title">
         
         <label for="configDescription">Description:</label>
-        <input type="text" id="configDescription" name="configDescription" value="${event.text || ''}" placeholder="Event Description">
+        <input type="text" id="configDescription" name="configDescription" value="${state.current.text || ''}" placeholder="Event Description">
 
         <label for="configCategory">Category:</label>
-        <input type="text" id="configCategory" name="configCategory" value="${event.category || ''}" placeholder="Event Category">
+        <input type="text" id="configCategory" name="configCategory" value="${state.current.category || ''}" placeholder="Event Category">
 
         <label for="configImage">Image URL:</label>
-        <input type="text" id="configImage" name="configImage" value="${event.imageUrl || ''}" placeholder="Image URL">
+        <input type="text" id="configImage" name="configImage" value="${state.current.imageUrl || ''}" placeholder="Image URL">
       `;
     }
 
     // Create sub-event config fields
     function createSubEventConfigFields(configFields, event) {
+        //console.log(state.current.id)
       configFields.innerHTML = `
         <label for="configTitle">Title:</label>
-        <input type="text" id="configTitle" name="configTitle" value="${event.title || ''}" placeholder="Sub-Event Title">
+        <input type="text" id="configTitle" name="configTitle" value="${state.current.title || ''}" placeholder="Sub-Event Title">
         
         <label for="configDescription">Description:</label>
-        <input type="text" id="configDescription" name="configDescription" value="${event.text || ''}" placeholder="Sub-Event Description">
+        <input type="text" id="configDescription" name="configDescription" value="${state.current.text || ''}" placeholder="Sub-Event Description">
 
         <label for="configDate">Date:</label>
-        <input type="text" id="configDate" name="configDate" value="${event.date || ''}" placeholder="Sub-Event Date">
+        <input type="text" id="configDate" name="configDate" value="${state.current.date || ''}" placeholder="Sub-Event Date">
 
         <label for="configStartTime">Start Time:</label>
-        <input type="text" id="configStartTime" name="configStartTime" value="${event.start || ''}" placeholder="Start Time">
+        <input type="text" id="configStartTime" name="configStartTime" value="${state.current.start || ''}" placeholder="Start Time">
 
         <label for="configEndTime">End Time:</label>
-        <input type="text" id="configEndTime" name="configEndTime" value="${event.end || ''}" placeholder="End Time">
+        <input type="text" id="configEndTime" name="configEndTime" value="${state.current.end || ''}" placeholder="End Time">
 
         <label for="configOriginalPrice">Original Price:</label>
-        <input type="text" id="configOriginalPrice" name="configOriginalPrice" value="${event.originalprice || ''}" placeholder="Original Price">
+        <input type="text" id="configOriginalPrice" name="configOriginalPrice" value="${state.current.originalprice || ''}" placeholder="Original Price">
 
         <label for="configPrice">Price:</label>
-        <input type="text" id="configPrice" name="configPrice" value="${event.price || ''}" placeholder="Price">
+        <input type="text" id="configPrice" name="configPrice" value="${state.current.price || ''}" placeholder="Price">
 
         <label for="configStatus">Status:</label>
-        <input type="text" id="configStatus" name="configStatus" value="${event.status || ''}" placeholder="Status">
+        <input type="text" id="configStatus" name="configStatus" value="${state.current.status || ''}" placeholder="Status">
 
         <label for="configStock">Stock:</label>
-        <input type="text" id="configStock" name="configStock" value="${event.stock || ''}" placeholder="Stock">
+        <input type="text" id="configStock" name="configStock" value="${state.current.stock || ''}" placeholder="Stock">
       `;
     }
 
@@ -458,7 +475,7 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
     };
 
     try {
-      console.log({ documentId, subEventId, updates })
+      //console.log({ documentId, subEventId, updates })
       const response = await fetch('https://stripebackend-production-0a48.up.railway.app/update-sub-event', {
     method: 'POST',
     headers: {
@@ -470,7 +487,10 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
 
         const result = await response.json();
         if (response.ok) {
+          await refreshPage();
             alert('Properties updated successfully!');
+            // document.getElementById('configTitle').value = 'lol'
+            // console.log(document.getElementById('configTitle').value)
             
         } else {
             alert(`Error: ${result.error}`);
@@ -503,6 +523,7 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
 
         const result = await response.json();
         if (response.ok) {
+          await refreshPage();
             alert('Properties updated successfully!');
             
         } else {
@@ -521,7 +542,7 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
       try {
         const events = await fetchData('Events');
         setState({ local: events });
-        console.log(state.local)
+        //console.log(state.local)
         const payments = await fetchData('payments');
         
         // Create a map of payments by event
@@ -534,7 +555,7 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
         });
 
         // Render the event tree
-        createEventTree(events, paymentsByEvent, document.getElementById('treeContainer'));
+        createEventTree(events,paymentsByEvent, document.getElementById('treeContainer'));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
