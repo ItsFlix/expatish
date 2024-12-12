@@ -206,6 +206,7 @@
     <div id="configFields"></div>
 
     <button id="saveConfigButton">Save</button>
+    <button id="DeleteButton">Delete</button>
   </div>
 
   <script>
@@ -324,7 +325,7 @@
           configFields.innerHTML = ''; // Clear previous fields
           //console.log('updating fields')
 
-          if (event.subcollections && event.subcollections['->']) {
+          if (event.category && event.imageUrl) {
             // This is a sub-event, show sub-event properties
             createMainEventConfigFields(configFields, event);
           } else {
@@ -536,6 +537,76 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
 
     }
 });
+
+//delete button func
+document.getElementById('DeleteButton').addEventListener('click', async () => {
+    const documentId = state.current.id; // Fetch dynamically from a data attribute
+    const pricecheck = state.current.price
+
+    if (!documentId) {
+        alert("Document ID not found. Please select an event to delete.");
+        return;
+    }
+
+    if (pricecheck){
+      console.log('sub event')
+      const subDocumentId = state.current.id
+      const mainDocumentId = state.current._id
+
+    try {
+      const response = await fetch('https://stripebackend-production-0a48.up.railway.app/delete-subcollection', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+    },
+    body: JSON.stringify({ mainDocumentId, subDocumentId }),
+});
+
+        const result = await response.json();
+        if (response.ok) {
+          await refreshPage();
+            alert('Deleted subcollection successfully!');
+            
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting subcollection:', error);
+        alert('An error occurred. Please try again.');
+    }
+    }
+
+    if (!pricecheck){
+      console.log('main event')
+
+    try {
+        const response = await fetch('https://stripebackend-production-0a48.up.railway.app/delete-collection', {
+            method: 'POST',
+            headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}` // Replace 'token' with your actual token variable
+    },
+            body: JSON.stringify({ documentId}),
+        });
+        
+
+        const result = await response.json();
+        if (response.ok) {
+          await refreshPage();
+            alert('Deleted collection successfully!');
+            
+        } else {
+            alert(`Error: ${result.error}`);
+        }
+    } catch (error) {
+        console.error('Error deleting collection:', error);
+        alert('An error occurred. Please try again.');
+    }
+
+    }
+});
+
 
     // Example initialization
     async function init() {
