@@ -607,6 +607,58 @@ document.getElementById('DeleteButton').addEventListener('click', async () => {
     }
 });
 
+//Add button func
+document.getElementById('addButton').addEventListener('click', async (e) => {
+  e.preventDefault(); // Prevent default form submission behavior
+
+// Collect values from form fields
+const eventtitle = document.getElementById('title').value.trim();
+const eventdescription = document.getElementById('description').value.trim();
+const eventcategory = document.getElementById('category').value.trim();
+const eventimage = document.getElementById('image').value.trim();
+
+// Validate inputs (optional)
+if (!eventtitle) {
+    alert('Please fill in all required fields.');
+    return;
+}
+
+// Create the data payload
+const newEvent = {
+  category: eventcategory,
+  title : eventtitle,
+  text: eventdescription,
+  imageUrl : eventimage,
+};
+
+// Send request to the server
+fetch('https://stripebackend-production-0a48.up.railway.app/add-main-event', {
+    method: 'POST', // HTTP method
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.token}`
+    },
+    body: JSON.stringify(newEvent), // Convert the data to a JSON string
+})
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert('Event added successfully!');
+        console.log('Server response:', data);
+
+        // Optionally, update UI or refresh events list
+        //addEventToLocalState(newEvent);
+    })
+    .catch(error => {
+        console.error('Error adding event:', error);
+        alert('Failed to add event. Please try again.');
+    });
+})
+
 
     // Example initialization
     async function init() {
