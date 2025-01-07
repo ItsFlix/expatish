@@ -57,6 +57,47 @@
       margin: 5px 0;
     }
 
+    #pendingPaymentsContainer {
+    margin-bottom: 10;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+}
+
+#pendingPaymentsButton {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0);
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+}
+
+#pendingPaymentsButton:focus {
+    outline: none;
+}
+
+#pendingPaymentsContent {
+    margin-top: 5;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    display: none;
+}
+
+.pendingPaymentItem {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 2.5px;
+    border-radius: 5px;
+    background-color: #ffffff;
+}
+
     #formContainer {
       width: 300px;
       padding: 20px;
@@ -180,7 +221,16 @@
     </div>
   </div>
 
-  <div id="treeContainer"></div>
+  <div id="treeContainer">
+    <!-- <div id="pendingPaymentsContainer"> -->
+      <button id="pendingPaymentsContainer">Pending Payments</button>
+      <div id="pendingPaymentsContent" style="display: none;">
+        <div id="pendingPaymentsList">
+            <!-- Fetched pending payments will be displayed here -->
+        </div>
+    </div>
+    <!-- </div> -->
+  </div>
   <!-- Form container for title, description, category, image -->
   <div id="formContainer">
     <h3>Add New Event</h3>
@@ -231,6 +281,7 @@
 
     <button id="addSubEventButton">Add</button>
 </div>
+
 
   <!-- Configure Properties Frame -->
   <div class="configureProperties" id="configureProperties">
@@ -745,6 +796,85 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-sub-event', {
     });
 })
 
+
+//Pending payment
+document.getElementById("pendingPaymentsContainer").addEventListener("click", async () => {
+            const content = document.getElementById("pendingPaymentsContent");
+            const paymentsList = document.getElementById("pendingPaymentsList");
+
+            if (content.style.display === "none" || content.style.display === "") {
+                content.style.display = "block"; // Expand
+
+                // Clear any existing data to prevent duplicates
+                paymentsList.innerHTML = "<p>Loading...</p>";
+
+                try {
+                    // Fetch data from the API endpoint
+                    const response = await fetch("https://stripebackend-production-0a48.up.railway.app/get-pending", {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            'Authorization': `Bearer ${state.token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.statusText}`);
+                    }
+
+                    const pendingPayments = await response.json();
+
+                    // Handle case where no pending payments are returned
+                    if (!pendingPayments || pendingPayments.length === 0) {
+                        paymentsList.innerHTML = "<p>No pending payments found.</p>";
+                        return;
+                    }
+
+                    // Render each pending payment
+                    paymentsList.innerHTML = ""; // Clear loading message
+                    pendingPayments.forEach((payment) => {
+
+                                      // Convert 'created' to a readable date format
+                    const createdDate = payment.created && payment.created._seconds
+                    ? new Date(payment.created._seconds * 1000).toLocaleString() // Convert seconds to milliseconds
+                    : "Unknown";
+                        // Create a frame for each payment
+                        const paymentItem = document.createElement("div");
+                        paymentItem.className = "pendingPaymentItem";
+                        paymentItem.innerHTML = `
+                            <h4>${payment.title || "Untitled Payment"}</h4>
+                            <p><strong>Name:</strong> ${payment.name || "Unknown"}</p>
+                            <p><strong>Email:</strong> ${payment.email || "?"}</p>
+                            <p><strong>Currency:</strong> ${payment.currency || "?"}</p>
+                            <p><strong>Amount:</strong> ${payment.amount || "?"}</p>
+                            <p><strong>Price:</strong> $${payment.total || "?"}</p>
+                            <p><strong>Date:</strong> ${payment.date || "?"}</p>
+                            <p><strong>Start Time:</strong> ${payment.start || "?"}</p>
+                            <p><strong>End Time:</strong> ${payment.end || "?"}</p>
+                            <p><strong>Description:</strong> ${payment.text || "?"}</p>
+                            <p><strong>_id:</strong> ${payment._id || "?"}</p>
+                            <p><strong>Eventid:</strong> ${payment.eventid || "?"}</p>
+                            <p><strong>UserId:</strong> ${payment.userid || "?"}</p>
+                            <p><strong>RequestedAt:</strong> ${createdDate}</p>
+                        `;
+
+                                  // Create 'Complete Order' button
+          const completeOrderButton = document.createElement("button");
+          completeOrderButton.textContent = "Complete Order";
+          completeOrderButton.style.marginTop = "10px";
+
+          paymentItem.appendChild(completeOrderButton);
+                        paymentsList.appendChild(paymentItem);
+                        console.log(payment.created)
+                    });
+                } catch (error) {
+                    console.error("Error fetching pending payments:", error);
+                    paymentsList.innerHTML = "<p>Error loading payments. Please try again later.</p>";
+                }
+            } else {
+                content.style.display = "none"; // Collapse
+            }
+        });
 
 
     // Example initialization
