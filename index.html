@@ -944,7 +944,25 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
                             <p><strong>RequestedAt:</strong> ${createdDate}</p>
                         `;
 
-                                  // Create 'Complete Order' button
+
+          // Create a container div to hold the buttons
+const ActionbuttonContainer = document.createElement("div");
+ActionbuttonContainer.style.display = "flex";
+ActionbuttonContainer.style.justifyContent = "flex-start"; // Distribute space between buttons
+ActionbuttonContainer.style.gap = "10px"; // Adjust the space between buttons
+
+          // Create 'Decline Order' button
+          const declineOrderButton = document.createElement("button");
+          declineOrderButton.textContent = "Decline Order";
+          declineOrderButton.style.marginTop = "10px";
+          declineOrderButton.style.backgroundColor = "#FF0000"
+          declineOrderButton.style.color = "#fff"
+          declineOrderButton.style.border = 'none'
+          declineOrderButton.style.cursor = 'pointer'
+          declineOrderButton.style.padding = '10px'
+          declineOrderButton.style.borderRadius = '5px'
+
+          // Create 'Complete Order' button
           const completeOrderButton = document.createElement("button");
           completeOrderButton.textContent = "Complete Order";
           completeOrderButton.style.marginTop = "10px";
@@ -981,7 +999,9 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
             }
           });
 
-          paymentItem.appendChild(completeOrderButton);
+          ActionbuttonContainer.appendChild(completeOrderButton);
+          ActionbuttonContainer.appendChild(declineOrderButton);
+          paymentItem.appendChild(ActionbuttonContainer);
                         paymentsList.appendChild(paymentItem);
                         console.log(payment.created)
                     });
