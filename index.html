@@ -933,7 +933,7 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
                             <p><strong>Currency:</strong> ${payment.currency || "?"}</p>
                             <p><strong>Amount:</strong> ${payment.amount || "?"}</p>
                             <p><strong>Price:</strong> $${payment.total || "?"}</p>
-                            <p><strong>PendingOrderNumber:</strong> ${payment.pendingordernumber || "?"}</p>
+                            <p><strong>PendingOrderId:</strong> ${payment.pendingorderid || "?"}</p>
                             <p><strong>Date:</strong> ${payment.date || "?"}</p>
                             <p><strong>Start Time:</strong> ${payment.start || "?"}</p>
                             <p><strong>End Time:</strong> ${payment.end || "?"}</p>
@@ -964,7 +964,7 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
                             "Content-Type": "application/json",
                             'Authorization': `Bearer ${state.token}`
                         },
-                  body: JSON.stringify({ pendingordernumber: payment.pendingordernumber }),
+                  body: JSON.stringify({ pendingorderid: payment.pendingorderid }),
                 }
               );
 
@@ -974,7 +974,7 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
 
               alert("Order marked as complete!");
               // Optionally refresh the pending payments list
-              pendingPaymentsButton.click();
+              
             } catch (error) {
               console.error("Error completing order:", error);
               alert("Failed to complete order. Please try again.");
