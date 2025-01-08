@@ -961,6 +961,32 @@ ActionbuttonContainer.style.gap = "10px"; // Adjust the space between buttons
           declineOrderButton.style.cursor = 'pointer'
           declineOrderButton.style.padding = '10px'
           declineOrderButton.style.borderRadius = '5px'
+          declineOrderButton.addEventListener("click", async () => {
+            try {
+              const completeResponse = await fetch(
+                "https://stripebackend-production-0a48.up.railway.app/decline-pending-order",
+                {
+                  method: "POST",
+                  headers: {
+                            "Content-Type": "application/json",
+                            'Authorization': `Bearer ${state.token}`
+                        },
+                  body: JSON.stringify({ pendingorderid: payment.pendingorderid }),
+                }
+              );
+
+              if (!completeResponse.ok) {
+                throw new Error("Failed to decline order");
+              }
+
+              alert("Order declined!");
+              // Optionally refresh the pending payments list
+              
+            } catch (error) {
+              console.error("Error declining order:", error);
+              alert("Failed to decline order. Please try again.");
+            }
+          });
 
           // Create 'Complete Order' button
           const completeOrderButton = document.createElement("button");
