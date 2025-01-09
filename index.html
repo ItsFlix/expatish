@@ -324,17 +324,48 @@
             state = { ...state, ...newState };
         };
 
-    document.getElementById('tokenSubmitButton').addEventListener('click', () => {
-      const tokenInput = document.getElementById('tokenInput').value.trim();
-      if (tokenInput) {
-        setState({ token: tokenInput });
-        document.getElementById('tokenModal').style.display = 'none';
-        init(); // Initialize the app after token is set
-      } else {
-        alert('Please enter a valid token.');
-      }
-    });
+// Function to get a cookie value by its name
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
 
+// Function to set a cookie
+function setCookie(name, value, days) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000)); // Set expiration time
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
+
+// Check if the cookie exists on page load
+window.onload = () => {
+    const token = getCookie('authToken'); // Check if the 'authToken' cookie exists
+    if (token) {
+        // If the token cookie exists, set it in the state and initialize the app
+        document.getElementById('tokenModal').style.display = 'none';
+        setState({ token: token });
+        init(); // Initialize the app with the token
+    } else {
+        // If the token cookie does not exist, show the modal to input the token
+        //document.getElementById('tokenModal').style.display = 'block';
+    }
+};
+
+// Handle the token submission from the modal
+document.getElementById('tokenSubmitButton').addEventListener('click', () => {
+    const tokenInput = document.getElementById('tokenInput').value.trim();
+    if (tokenInput) {
+        // Set the token in the state and save it as a cookie
+        setState({ token: tokenInput });
+        setCookie('authToken', tokenInput, 7); // Save the token in a cookie for 7 days
+        document.getElementById('tokenModal').style.display = 'none'; // Hide the modal
+        init(); // Initialize the app after the token is set
+    } else {
+        alert('Please enter a valid token.');
+    }
+});
 
     async function refreshPage() {
   try {
@@ -930,6 +961,7 @@ document.getElementById("pendingPaymentsContainer").addEventListener("click", as
                             <h4>${payment.title || "Untitled Payment"}</h4>
                             <p><strong>Name:</strong> ${payment.name || "Unknown"}</p>
                             <p><strong>Email:</strong> ${payment.email || "?"}</p>
+                            <p><strong>Method:</strong> ${payment.method || "?"}</p>
                             <p><strong>Currency:</strong> ${payment.currency || "?"}</p>
                             <p><strong>Amount:</strong> ${payment.amount || "?"}</p>
                             <p><strong>Price:</strong> $${payment.total || "?"}</p>
