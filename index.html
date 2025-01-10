@@ -359,7 +359,7 @@ document.getElementById('tokenSubmitButton').addEventListener('click', () => {
     if (tokenInput) {
         // Set the token in the state and save it as a cookie
         setState({ token: tokenInput });
-        setCookie('authToken', tokenInput, 7); // Save the token in a cookie for 7 days
+        setCookie('authToken', tokenInput, 31); // Save the token in a cookie for 7 days
         document.getElementById('tokenModal').style.display = 'none'; // Hide the modal
         init(); // Initialize the app after the token is set
     } else {
@@ -784,6 +784,7 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-main-event', {
     .then(data => {
         alert('Event added successfully!');
         console.log('Server response:', data);
+        location.reload();
 
         // Optionally, update UI or refresh events list
         //addEventToLocalState(newEvent);
