@@ -118,6 +118,14 @@
       border-radius: 5px;
     }
 
+    #formContainer select {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
     #formContainer button {
       top: 5px;
       right: 5px;
@@ -147,6 +155,14 @@
       width: 100%;
       padding: 8px;
       margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .configureProperties select {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
@@ -240,6 +256,10 @@
     </div>
 </div>
 
+<div id="notificationFrame" style="display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; font-size: 16px;">
+  Notification message
+</div>
+
   <div id="treeContainer">
     <!-- <div id="pendingPaymentsContainer"> -->
       <button id="pendingPaymentsContainer">Pending Payments
@@ -293,11 +313,18 @@
     <label for="price">Price:</label>
     <input type="text" id="price" name="price" placeholder="Price">
 
-    <label for="status">Status:</label>
-    <input type="text" id="status" name="status" placeholder="Status">
-
     <label for="stock">Stock:</label>
     <input type="text" id="stock" name="stock" placeholder="Stock">
+
+    <label for="status">Status:</label>
+    <select id="statusSelector" name="statusSelector">
+      <option value="" disabled selected>Select a status</option>
+      <option value="purchasable">Purchasable</option>
+      <option value="active">Active</option>
+      <option value="finished">Finished</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
 
     <button id="addSubEventButton">Add</button>
 </div>
@@ -318,6 +345,7 @@
             local: '',
             current: '',
             token: '',
+            status: '',
         };
 
         const setState = (newState) => {
@@ -337,6 +365,18 @@ function setCookie(name, value, days) {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000)); // Set expiration time
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
+
+function notify(message, duration = 3000, type = 'success') {
+    const notification = document.getElementById('notificationFrame');
+    notification.textContent = message;
+    notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#FF0000'; // Green for success, red for error
+    notification.style.display = 'block';
+
+    // Hide after the specified duration
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, duration);
 }
 
 // Check if the cookie exists on page load
@@ -576,13 +616,18 @@ eventFrame.addEventListener('click', () => {
         <label for="configPrice">Price:</label>
         <input type="text" id="configPrice" name="configPrice" value="${state.current.price || ''}" placeholder="Price">
 
-        <label for="configStatus">Status:</label>
-        <input type="text" id="configStatus" name="configStatus" value="${state.current.status || ''}" placeholder="Status">
-
         <label for="configStock">Stock:</label>
         <input type="text" id="configStock" name="configStock" value="${state.current.stock || ''}" placeholder="Stock">
+
+<label for="configStatus">Status:</label>
+        <input type="text" id="configStatus" name="configStatus" value="${state.current.status || ''}" placeholder="Status">
       `;
     }
+
+  document.getElementById('statusSelector').addEventListener('change', async (event) => {
+    state.status = event.target.value;
+    //console.log('Status updated to:', state.status);
+  });
 
 
 document.getElementById('saveConfigButton').addEventListener('click', async () => {
@@ -754,7 +799,7 @@ const eventimage = document.getElementById('image').value.trim();
 
 // Validate inputs (optional)
 if (!eventtitle) {
-    alert('Please fill in all required fields.');
+  notify('Please fill in all required fields.', 3000, 'error' );
     return;
 }
 
@@ -782,7 +827,7 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-main-event', {
         return response.json();
     })
     .then(data => {
-        alert('Event added successfully!');
+        notify('Event added successfully!');
         console.log('Server response:', data);
         location.reload();
 
@@ -809,7 +854,7 @@ document.getElementById('addSubEventButton').addEventListener('click', async (e)
         end: document.getElementById('endTime').value.trim(),
         originalprice: document.getElementById('originalPrice').value.trim(),
         price: document.getElementById('price').value.trim(),
-        status: document.getElementById('status').value.trim(),
+        status: state.status,
         stock: document.getElementById('stock').value.trim(),
     };
 
