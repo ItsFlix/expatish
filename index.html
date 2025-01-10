@@ -367,7 +367,7 @@ function setCookie(name, value, days) {
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
-function notify(message, duration = 3000, type = 'success') {
+function notify(message, type = 'success') {
     const notification = document.getElementById('notificationFrame');
     notification.textContent = message;
     notification.style.backgroundColor = type === 'success' ? '#4CAF50' : '#FF0000'; // Green for success, red for error
@@ -376,7 +376,7 @@ function notify(message, duration = 3000, type = 'success') {
     // Hide after the specified duration
     setTimeout(() => {
         notification.style.display = 'none';
-    }, duration);
+    }, 5000);
 }
 
 // Check if the cookie exists on page load
@@ -403,7 +403,7 @@ document.getElementById('tokenSubmitButton').addEventListener('click', () => {
         document.getElementById('tokenModal').style.display = 'none'; // Hide the modal
         init(); // Initialize the app after the token is set
     } else {
-        alert('Please enter a valid token.');
+        notify('Please enter a valid token.', 'error');
     }
 });
 
@@ -635,7 +635,7 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
     const pricecheck = state.current.price
 
     if (!documentId) {
-        alert("Document ID not found. Please select an event to configure.");
+        notify("Document ID not found. Please select an event to configure.", 'error');
         return;
     }
 
@@ -669,16 +669,16 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
         const result = await response.json();
         if (response.ok) {
           await refreshPage();
-            alert('Properties updated successfully!');
+            notify('Properties updated successfully!');
             // document.getElementById('configTitle').value = 'lol'
             // console.log(document.getElementById('configTitle').value)
             
         } else {
-            alert(`Error: ${result.error}`);
+            notify(`Error: ${result.error}`,'error');
         }
     } catch (error) {
         console.error('Error saving configuration:', error);
-        alert('An error occurred. Please try again.');
+        notify('An error occurred. Please try again.', 'error');
     }
     }
 
@@ -705,14 +705,14 @@ document.getElementById('saveConfigButton').addEventListener('click', async () =
         const result = await response.json();
         if (response.ok) {
           await refreshPage();
-            alert('Properties updated successfully!');
+            notify('Properties updated successfully!');
             
         } else {
-            alert(`Error: ${result.error}`);
+            notify(`Error: ${result.error}`, 'error');
         }
     } catch (error) {
         console.error('Error saving configuration:', error);
-        alert('An error occurred. Please try again.');
+        notify('An error occurred. Please try again.', 'error');
     }
 
     }
@@ -724,7 +724,7 @@ document.getElementById('DeleteButton').addEventListener('click', async () => {
     const pricecheck = state.current.price
 
     if (!documentId) {
-        alert("Document ID not found. Please select an event to delete.");
+        notify("Document ID not found. Please select an event to delete.", 'error');
         return;
     }
 
@@ -746,14 +746,14 @@ document.getElementById('DeleteButton').addEventListener('click', async () => {
         const result = await response.json();
         if (response.ok) {
           await refreshPage();
-            alert('Deleted subcollection successfully!');
+            notify('Deleted subcollection successfully!');
             
         } else {
-            alert(`Error: ${result.error}`);
+            notify(`Error: ${result.error}`, 'error');
         }
     } catch (error) {
         console.error('Error deleting subcollection:', error);
-        alert('An error occurred. Please try again.');
+        notify('An error occurred. Please try again.', 'error');
     }
     }
 
@@ -774,14 +774,14 @@ document.getElementById('DeleteButton').addEventListener('click', async () => {
         const result = await response.json();
         if (response.ok) {
           await refreshPage();
-            alert('Deleted collection successfully!');
+            notify('Deleted collection successfully!');
             
         } else {
-            alert(`Error: ${result.error}`);
+            notify(`Error: ${result.error}`, 'error');
         }
     } catch (error) {
         console.error('Error deleting collection:', error);
-        alert('An error occurred. Please try again.');
+        notify('An error occurred. Please try again.', 'error');
     }
 
     }
@@ -799,7 +799,7 @@ const eventimage = document.getElementById('image').value.trim();
 
 // Validate inputs (optional)
 if (!eventtitle) {
-  notify('Please fill in all required fields.', 3000, 'error' );
+  notify('Please fill in all required fields.', 'error' );
     return;
 }
 
@@ -836,7 +836,7 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-main-event', {
     })
     .catch(error => {
         console.error('Error adding event:', error);
-        alert('Failed to add event. Please try again.');
+        notify('Failed to add event. Please try again.', 'error');
     });
 })
 
@@ -860,7 +860,7 @@ document.getElementById('addSubEventButton').addEventListener('click', async (e)
 
     // Validate required fields
     if (!subEventData.title || !subEventData.date) {
-        alert('Please fill in the required fields (Title and Date).');
+        notify('Please fill in the required fields (Title and Date).', 'error');
         return;
     }
 
@@ -881,7 +881,7 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-sub-event', {
         return response.json();
     })
     .then(data => {
-        alert('SubEvent added successfully!');
+        notify('SubEvent added successfully!');
         console.log('Server response:', data);
 
         // Optionally, update UI or refresh events list
@@ -889,7 +889,7 @@ fetch('https://stripebackend-production-0a48.up.railway.app/add-sub-event', {
     })
     .catch(error => {
         console.error('Error adding Subevent:', error);
-        alert('Failed to add Subevent. Please try again.');
+        notify('Failed to add Subevent. Please try again.', 'error');
     });
 })
 
@@ -1057,12 +1057,12 @@ ActionbuttonContainer.style.gap = "10px"; // Adjust the space between buttons
                 throw new Error("Failed to decline order");
               }
 
-              alert("Order declined!");
+              notify("Order declined!");
               // Optionally refresh the pending payments list
               
             } catch (error) {
               console.error("Error declining order:", error);
-              alert("Failed to decline order. Please try again.");
+              notify("Failed to decline order. Please try again.", 'error');
             }
           });
 
@@ -1094,12 +1094,12 @@ ActionbuttonContainer.style.gap = "10px"; // Adjust the space between buttons
                 throw new Error("Failed to complete order");
               }
 
-              alert("Order marked as complete!");
+              notify("Order marked as complete!");
               // Optionally refresh the pending payments list
               
             } catch (error) {
               console.error("Error completing order:", error);
-              alert("Failed to complete order. Please try again.");
+              notify("Failed to complete order. Please try again.", 'error');
             }
           });
 
